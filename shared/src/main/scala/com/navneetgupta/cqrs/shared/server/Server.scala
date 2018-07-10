@@ -23,7 +23,6 @@ class Server(boot: Bootstrap, service: String) {
   val finalRoutes = pathPrefix("api")(definedRoutes)
 
   val conf1 = ConfigFactory.load.getConfig(service).resolve()
-  log.info("===============Conf1 resolved is {} ================", conf1)
 
   val serviceConf = system.settings.config.getConfig(service)
 
@@ -31,7 +30,6 @@ class Server(boot: Bootstrap, service: String) {
     Http().bind(interface = serviceConf.getString("ip"), port = serviceConf.getInt("port"))
 
   log.info("Starting up on port {} and ip {}", serviceConf.getString("port"), serviceConf.getString("ip"))
-  log.info("final Routes are {}", finalRoutes)
 
   val sink = Sink.foreach[Http.IncomingConnection](_.handleWith(finalRoutes))
   serverSource.to(sink).run

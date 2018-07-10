@@ -33,26 +33,20 @@ class UserAggregate extends BaseAggregate[UserFO, User] {
   import akka.pattern.ask
   import User._
 
-  //val repo = new UserRepository
-
   override def receive = {
     case FindUserByEmail(email) =>
       log.info("Finding User by email {}", email)
 
       forwardCommand(email, GetState(email))
     case SignUpUser(input) =>
-      //val user = lookupOrCreateChild(input.email)
-      //Check uniqueness of email here
       implicit val timeout = Timeout(5 seconds)
       val stateFut = (entityShardRegion ? GetState(input.email)).mapTo[ServiceResult[UserFO]]
       val caller = sender()
       stateFut onComplete {
         case util.Success(FullResult(user)) =>
-          log.info("Get Succesul User wiht same email already existing")
           caller ! Failure(FailureType.Validation, EmailNotUniqueError)
 
         case util.Success(EmptyResult) =>
-          log.info("CreateUser: Get Succesul User wiht same email Not existing")
           val fo = UserFO(input.email, input.firstName, input.lastName, new Date, new Date)
           entityShardRegion.tell(CreateUser(fo), caller)
 

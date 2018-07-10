@@ -47,7 +47,6 @@ trait ElasticsearchSupport { me: BaseActor =>
   def baseUrl = s"${esSettings.rootUrl}/${indexRoot}/$entityType"
 
   def callElasticsearch[RT: ClassTag](req: HttpRequest)(implicit ec: ExecutionContext, mater: Materializer, unmarshaller: Unmarshaller[ResponseEntity, RT]): Future[RT] = {
-    log.info("======================Call Elastic Search Request to be made is {} ========================", req)
     Http(context.system).
       singleRequest(req).
       flatMap {
@@ -61,10 +60,8 @@ trait ElasticsearchSupport { me: BaseActor =>
 
   def queryElasticsearch[RT](query: String)(implicit ec: ExecutionContext, mater: Materializer, jf: RootJsonFormat[RT]): Future[List[RT]] = {
     val req = HttpRequest(HttpMethods.GET, Uri(s"$baseUrl/_search").withQuery(Uri.Query(("q", query))))
-    log.info("**********************Query Elastic Search Request to be made is {} **********************", req)
     callElasticsearch[QueryResponse](req).
       map(resp => {
-        log.info("**********************Recieved Response From Elastic Search API {}**********************", resp)
         resp.hits.hits.map(_._source.convertTo[RT])
       })
   }
@@ -77,7 +74,6 @@ trait ElasticsearchSupport { me: BaseActor =>
     }
     val entity = HttpEntity(ContentTypes.`application/json`, request.toJson.prettyPrint)
     val req = HttpRequest(HttpMethods.POST, requestUrl, entity = entity)
-    log.info("**********************Update Index Elastic Search Request to be made is {} **********************", req)
     callElasticsearch[IndexingResult](req)
   }
 
@@ -89,12 +85,10 @@ trait ElasticsearchSupport { me: BaseActor =>
 }
 
 class ElasticsearchSettingsImpl(conf: Config) extends Extension {
-  println("==================== ElasticSearch Settings calles")
   val esConfig = conf.getConfig("elasticsearch")
   val host = esConfig.getString("host")
   val port = esConfig.getInt("port")
   val rootUrl = s"http://$host:$port"
-  println("==================== ElasticSearch Settings called has rootUrl :  " + rootUrl)
 }
 
 object ElasticsearchSettings extends ExtensionId[ElasticsearchSettingsImpl] with ExtensionIdProvider {

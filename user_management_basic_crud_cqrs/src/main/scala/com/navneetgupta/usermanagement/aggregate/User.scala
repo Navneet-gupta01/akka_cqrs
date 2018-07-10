@@ -36,13 +36,10 @@ class User extends BasePersistentEntity[UserFO] {
 
   def handleEvent(event: BaseEvent) = event match {
     case UserCreated(user) =>
-      log.info("======================= UserCreated From handleEvent with user: {}", user)
       state = user
     case PersonalInfoUpdated(first, last) =>
-      log.info("======================= PersonalInfoUpdated From handleEvent with user:")
       state = state.copy(firstName = first, lastName = last)
     case UserDeleted(email) =>
-      log.info("======================= UserDeleted From handleEvent with email: {}", email)
       state = state.markDeleted
   }
 
