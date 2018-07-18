@@ -19,4 +19,8 @@ class ClusterShardEntityLocator(maxShards: Int)(implicit actorSystem: ActorSyste
     case bc: BaseCommand =>
       (math.abs(bc.entityId.hashCode) % maxShards).toString
   }
+  println("====================ClusterShardEntityLocator========================")
+  println("extractEntityId = " + extractEntityId)
+  println("extractShardId = " + extractShardId)
+  println("====================ClusterShardEntityLocator========================")
 }

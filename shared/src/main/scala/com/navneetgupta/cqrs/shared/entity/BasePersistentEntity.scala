@@ -88,6 +88,7 @@ abstract class BasePersistentEntity[FO <: BaseFieldsObject[String, FO]: ClassTag
       log.info("Getting State for Id : {} for EntityType: {}", id, entityType)
       sender() ! stateResponse()
     case MarkAsDeleted =>
+      log.info("MarkAsDelete Event Hitted for Entitytype: {} and id : {}", entityType, id)
       newDeleteEvent match {
         case None =>
           log.info("The entity type {} does not support deletion, ignoring delete request", entityType)
@@ -116,7 +117,7 @@ abstract class BasePersistentEntity[FO <: BaseFieldsObject[String, FO]: ClassTag
 
   def newDeleteEvent: Option[BaseEvent] = None
 
-  def handleEventAndRespond(respectDeleted: Boolean = true)(event: BaseEvent) = {
+  def handleEventAndRespond[A](respectDeleted: Boolean = true)(event: BaseEvent) = {
     handleEvent(event)
     if (snapshotAfterCount.isDefined) {
       eventsSinceLastSnapshot += 1

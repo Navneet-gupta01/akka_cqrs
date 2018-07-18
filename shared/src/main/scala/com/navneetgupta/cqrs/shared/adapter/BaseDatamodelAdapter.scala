@@ -1,21 +1,22 @@
 package com.navneetgupta.cqrs.shared.adapter
 
 import akka.persistence.journal.EventAdapter
-import com.google.protobuf.Message
+import scalapb.Message
 import akka.persistence.journal.{ EventSeq, Tagged }
 import com.navneetgupta.cqrs.shared.event.BaseEvent
+import scalapb.GeneratedMessage
 
 trait DatamodelWriter {
-  def toDatamodel: Message
+  def toDatamodel: GeneratedMessage
 }
 trait DatamodelReader {
-  def fromDatamodel: PartialFunction[Message, AnyRef]
+  def fromDatamodel: PartialFunction[GeneratedMessage, AnyRef]
 }
 
 class BaseDatamodelAdapter extends EventAdapter {
   override def fromJournal(event: Any, manifest: String): EventSeq = {
     event match {
-      case m: Message =>
+      case m: GeneratedMessage =>
         val reader = Class.forName(manifest + "$").getField("MODULE$").get(null).asInstanceOf[DatamodelReader]
         reader.
           fromDatamodel.

@@ -125,7 +125,12 @@ abstract class ViewBuilder[RM <: ReadModelObject: ClassTag] extends BaseActor wi
   }
 
   def updateDocumentField(id: String, seq: Long, expressions: List[String], params: Map[String, Any]): Future[IndexingResult] = {
-    val script = expressions.map(e => s"ctx._source.$e").mkString(";")
+
+    val script = expressions.map(e => {
+      log.info("expressions is {} and script Creation is {} ", e, s"ctx._source.$e")
+      s"ctx._source.$e"
+    }).mkString(";")
+    log.info("Final Script is {} ", script)
     val request = UpdateRequest(UpdateScript(script, params))
     updateIndex(id, request, Some(seq))
   }

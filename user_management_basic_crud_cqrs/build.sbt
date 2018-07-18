@@ -1,16 +1,21 @@
 import Dependencies._
 
-lazy val root = (project in file(".")).
-  settings(
-    inThisBuild(List(
-      organization := "com.example",
-      scalaVersion := "2.12.6",
-      version      := "0.1.0-SNAPSHOT"
-    )),
-    name := "user_management_basic_crud_cqrs",
-    libraryDependencies  ++= {  
-	  Seq(
-	    "com.navneetgupta" %% "shared" % "0.1.1"
-	  )
-	}
+name := "user_management_basic_crud_cqrs"
+
+organization := "com.navneetgupta"
+
+version := "0.1.0"
+
+scalaVersion := "2.12.6"
+
+libraryDependencies ++= {
+  val akkaVersion = "2.5.11"
+  Seq(
+  	"com.navneetgupta" %% "shared" % "0.1.1",
+  	"com.thesamet.scalapb" %% "scalapb-runtime" % scalapb.compiler.Version.scalapbVersion % "protobuf"
   )
+}
+
+PB.targets in Compile := Seq(
+  scalapb.gen() -> (sourceManaged in Compile).value
+)

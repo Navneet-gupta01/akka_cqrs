@@ -7,6 +7,7 @@ import akka.actor.Props
 import com.navneetgupta.usermanagement.command._
 import com.navneetgupta.usermanagement.events._
 import com.navneetgupta.cqrs.shared.event.BaseEvent
+import com.navneetgupta.cqrs.shared.entity.BasePersistentEntity.MarkAsDeleted
 
 case class UserFO(email: String, firstName: String, lastName: String,
                   createTs: Date, modifyTs: Date, deleted: Boolean = false) extends BaseFieldsObject[String, UserFO] {
@@ -32,6 +33,8 @@ class User extends BasePersistentEntity[UserFO] {
 
     case UpdatePersonalInfo(input, id) =>
       persist(PersonalInfoUpdated(input.firstName, input.lastName)) { handleEventAndRespond() }
+    case MarkAsDeleted(email) =>
+      persist(UserDeleted(email))(handleEventAndRespond())
   }
 
   def handleEvent(event: BaseEvent) = event match {
@@ -48,5 +51,9 @@ class User extends BasePersistentEntity[UserFO] {
     case _              => false
   }
 
-  override def newDeleteEvent = Some(UserDeleted(id))
+  override def newDeleteEvent = {
+    log.info("===========================================new Delete Event===========")
+    log.info("id is : {}", id)
+    Some(UserDeleted(id))
+  }
 }

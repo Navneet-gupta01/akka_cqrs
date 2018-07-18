@@ -57,7 +57,7 @@ class UserAggregate extends BaseAggregate[UserFO, User] {
       forwardCommand(email, UpdatePersonalInfo(input, email))
 
     case DeleteUser(email) =>
-      forwardCommand(email, MarkAsDeleted)
+      forwardCommand(email, MarkAsDeleted(email))
   }
 
   override def entityProps: akka.actor.Props = User.props

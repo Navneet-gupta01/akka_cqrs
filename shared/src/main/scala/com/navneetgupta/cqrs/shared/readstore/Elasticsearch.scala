@@ -47,6 +47,8 @@ trait ElasticsearchSupport { me: BaseActor =>
   def baseUrl = s"${esSettings.rootUrl}/${indexRoot}/$entityType"
 
   def callElasticsearch[RT: ClassTag](req: HttpRequest)(implicit ec: ExecutionContext, mater: Materializer, unmarshaller: Unmarshaller[ResponseEntity, RT]): Future[RT] = {
+    log.info("====================================================")
+    log.info("Call ElasticSearch Request is {}", req)
     Http(context.system).
       singleRequest(req).
       flatMap {
@@ -60,6 +62,8 @@ trait ElasticsearchSupport { me: BaseActor =>
 
   def queryElasticsearch[RT](query: String)(implicit ec: ExecutionContext, mater: Materializer, jf: RootJsonFormat[RT]): Future[List[RT]] = {
     val req = HttpRequest(HttpMethods.GET, Uri(s"$baseUrl/_search").withQuery(Uri.Query(("q", query))))
+    log.info("====================================================")
+    log.info("Query ElasticSearch Request is {}", req)
     callElasticsearch[QueryResponse](req).
       map(resp => {
         resp.hits.hits.map(_._source.convertTo[RT])

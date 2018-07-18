@@ -38,7 +38,21 @@ class UserViewBuilder extends ViewBuilder[UserViewBuilder.UserRM] with UserReadM
       InsertAction(id, rm)
 
     case PersonalInfoUpdated(first, last) =>
-      UpdateAction(id, List("firstName = fn", "lastName = ln"), Map("fn" -> first, "ln" -> last))
+      //TODO: Verfiy With Elastic Search Format:: Here Format to Update was like ctx._source.firstName = params.fn
+
+      /*
+       * https://www.elastic.co/guide/en/elasticsearch/reference/current/docs-update.html
+       * {
+            "script": {
+              "source": "ctx._source.firstName = params.fn;ctx._source.lastName = params.ln", // See here params.whatever varibale used and then pass that varibale in map
+              "params": {
+                "fn": "Mr. Navnneet",
+                "ln": "Kumar Gupta"
+              }
+            }
+          }
+      */
+      UpdateAction(id, List("firstName = params.fn", "lastName = params.ln"), Map("fn" -> first, "ln" -> last))
 
     case UserDeleted(email) =>
       UpdateAction(id, "deleted = true", Map.empty[String, Any])

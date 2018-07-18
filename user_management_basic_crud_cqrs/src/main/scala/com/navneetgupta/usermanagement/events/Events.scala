@@ -3,73 +3,68 @@ package com.navneetgupta.usermanagement.events
 import com.navneetgupta.cqrs.shared.event.BaseEvent
 import com.navneetgupta.usermanagement.aggregate.User
 import com.navneetgupta.usermanagement.aggregate.UserFO
-import com.navneetgupta.usermanagement.protobuf.Datamodel
-import com.navneetgupta.usermanagement.protobuf.Datamodel._
+import com.navneetgupta.usermanagement.proto.datamodel.{ UserCreated => ProtoUserCreated, User => ProtoUser, PersonalInfoUpdated => ProtoPersonalInfoUpdated, UserDeleted => ProtoUserDeleted }
+
 import com.navneetgupta.cqrs.shared.adapter.DatamodelReader
 import java.util.Date
 
 trait UserEvent extends BaseEvent { override def entityType = User.EntityType }
 
-object UserCreated extends DatamodelReader {
-  override def fromDatamodel = {
-    case dm: Datamodel.UserCreated =>
-      println("From DataModel UserCreated")
-      val user = dm.getUser()
-      UserCreated(UserFO(user.getEmail(), user.getFirstName(), user.getLastName(), new Date(user.getCreateTs()), new Date(user.getModifyTs()), user.getDeleted()))
-  }
-}
-
 case class UserCreated(user: UserFO) extends UserEvent {
   override def toDatamodel = {
     println("To DataModel UserCreated")
-    val userDm = Datamodel.User.newBuilder().
-      setEmail(user.email).
-      setFirstName(user.firstName).
-      setLastName(user.lastName).
-      setCreateTs(new Date().getTime).
-      setModifyTs(new Date().getTime).
-      setDeleted(user.deleted)
-      .build
+    val userDm = ProtoUser.apply(
+      email = user.email,
+      firstName = user.firstName,
+      lastName = user.lastName,
+      createTs = user.createTs.getTime,
+      modifyTs = user.modifyTs.getTime,
+      deleted = user.deleted)
 
-    Datamodel.UserCreated.newBuilder().
-      setUser(userDm).
-      build
+    ProtoUserCreated(Some(userDm))
   }
 }
 
 case class PersonalInfoUpdated(firstName: String, lastName: String) extends UserEvent {
   override def toDatamodel = {
     println("To DataModel PersonalInfoUpdated")
-    Datamodel.PersonalInfoUpdated.newBuilder().
-      setFirstName(firstName).
-      setLastName(lastName).
-      setModifyTs(new Date().getTime).
-      build
+    ProtoPersonalInfoUpdated.apply(
+      firstName = firstName,
+      lastName = lastName,
+      modifyTs = new Date().getTime)
+  }
+}
+case class UserDeleted(email: String) extends UserEvent {
+  override def toDatamodel = {
+    println("To DataModel UserDeleted")
+    ProtoUserDeleted.apply(
+      email = email,
+      modifyTs = new Date().getTime)
+  }
+}
+
+object UserCreated extends DatamodelReader {
+  override def fromDatamodel = {
+    case dm: ProtoUserCreated =>
+      println("From DataModel UserCreated")
+      val user = dm.user.get
+      UserCreated(
+        user = UserFO(user.email, user.firstName, user.lastName, new Date(user.createTs), new Date(user.modifyTs), user.deleted))
   }
 }
 
 object PersonalInfoUpdated extends DatamodelReader {
   override def fromDatamodel = {
-    case dm: Datamodel.PersonalInfoUpdated =>
+    case dm: ProtoPersonalInfoUpdated =>
       println("From DataModel PersonalInfoUpdated")
-      PersonalInfoUpdated(dm.getFirstName(), dm.getLastName())
-  }
-}
-
-case class UserDeleted(email: String) extends UserEvent {
-  override def toDatamodel = {
-    println("To DataModel UserDeleted")
-    Datamodel.UserDeleted.newBuilder().
-      setEmail(email).
-      setModifyTs(new Date().getTime). // Not needed since events are alreay there for the time at which they are called
-      build
+      PersonalInfoUpdated(dm.firstName, dm.lastName)
   }
 }
 
 object UserDeleted extends DatamodelReader {
   override def fromDatamodel = {
-    case dm: Datamodel.UserDeleted =>
+    case dm: ProtoUserDeleted =>
       println("From DataModel UserDeleted")
-      UserDeleted(dm.getEmail())
+      UserDeleted(dm.email)
   }
 }

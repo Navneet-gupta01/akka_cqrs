@@ -24,6 +24,11 @@ libraryDependencies ++= {
 		"com.typesafe.akka" %% "akka-http-testkit" % "10.1.1",
 		"com.typesafe.akka" %% "akka-cluster" % akkaVersion,
 		"com.typesafe.akka" %% "akka-cluster-sharding" % akkaVersion,
-		"com.typesafe.akka" %% "akka-cluster-tools" % "2.5.13"
+		"com.typesafe.akka" %% "akka-cluster-tools" % "2.5.13",
+		"com.thesamet.scalapb" %% "scalapb-runtime" % scalapb.compiler.Version.scalapbVersion % "protobuf"
 	)
 }
+
+PB.targets in Compile := Seq(
+  scalapb.gen() -> (sourceManaged in Compile).value
+)
