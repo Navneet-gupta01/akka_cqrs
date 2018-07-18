@@ -1,3 +1,4 @@
+
 package com.navneetgupta.cqrs.shared.entity
 
 import com.navneetgupta.cqrs.shared.command.BaseCommand

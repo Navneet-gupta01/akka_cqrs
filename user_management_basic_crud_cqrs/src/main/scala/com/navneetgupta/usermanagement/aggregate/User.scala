@@ -34,7 +34,7 @@ class User extends BasePersistentEntity[UserFO] {
     case UpdatePersonalInfo(input, id) =>
       persist(PersonalInfoUpdated(input.firstName, input.lastName)) { handleEventAndRespond() }
     case MarkAsDeleted(email) =>
-      persist(UserDeleted(email))(handleEventAndRespond())
+      persist(UserDeleted(email))(handleEventAndRespond(false))
   }
 
   def handleEvent(event: BaseEvent) = event match {
@@ -56,4 +56,6 @@ class User extends BasePersistentEntity[UserFO] {
     log.info("id is : {}", id)
     Some(UserDeleted(id))
   }
+
+  override def snapshotAfterCount = Some(5)
 }
