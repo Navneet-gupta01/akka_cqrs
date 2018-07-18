@@ -2,11 +2,13 @@
 
 **To Run the cluster**
 
+### Update host for Seed nodes in the shared/reference.conf
+
 ```cd shared && sbt publishLocal```
 
 ```cd ../user_management_basic_crud_cqrs```
 
- Run below command from above Folder in two diffrent termianl tabs
+ Run below command from above Folder in two diffrent terminal tabs
 
  Open a Terminal Run 
    
